@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+<link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#e8e6e3">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>審神者執務小助手</title>
+    <style>
+        :root {
+            /* 背景改為淡雅的銀鼠色 */
+            --bg-light: #e8e6e3;
+            /* 木色調淺，改為更有質感的褐鐵色 */
+            --honmaru-wood: #5d4037;
+            /* 金色調為深古銅金，確保在淺色背景上的閱讀性 */
+            --gold: #8d743e;
+            --gold-light: #af955d;
+            /* 紙張顏色改為純淨的胡粉色 */
+            --washi: #ffffff;
+            --accent-red: #b71c1c;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            /* 優先順序：蘋果圓體 > 華康青花黑 > 思源宋體 > 標楷體 */
+            font-family: "PingFang TC", "STHeitiTC-Light", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-light);
+            background-image: radial-gradient(circle at 50% 50%, #f5f4f2 0%, #e8e6e3 100%);
+            margin: 0;
+            padding: 15px;
+            color: #555;
+            /* 稍微調淺一點點，增加柔和感 */
+            line-height: 1.7;
+            /* 增加行距，讓文字不擁擠 */
+            -webkit-font-smoothing: antialiased;
+            /* 讓字體邊緣更平滑 */
+        }
+
+        /* 針對標題使用更有文學氣息的宋體/明體 */
+        .app-header h2,
+        .tab-btn,
+        th,
+        b,
+        .roll-btn {
+            font-family: "Times New Roman", "Noto Serif TC", "Songti TC", "Apple LiSung", "微軟新細明體", serif;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        /* 讓按鈕文字更圓潤 */
+        .sub-btn {
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* 頂部標題：深木色配古銅金 */
+        .app-header {
+            text-align: center;
+            padding: 10px 0;
+            margin-bottom: 15px;
+        }
+
+        .app-header h2 {
+            color: var(--honmaru-wood);
+            letter-spacing: 3px;
+            font-weight: 600;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        /* Tab Bar：淺灰色磨砂質感 */
+        .tab-bar {
+            display: flex;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            padding: 4px;
+        }
+
+        .tab-btn {
+            padding: 12px 5px;
+            border: none;
+            background: none;
+            color: #777;
+            flex: 1;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .tab-btn.active {
+            color: white;
+            background: var(--honmaru-wood);
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(93, 64, 55, 0.2);
+        }
+
+        /* 頁面容器：純白紙張質感 */
+        .page {
+            display: none;
+            background: var(--washi);
+            border-radius: 20px;
+            padding: 20px;
+            min-height: 80vh;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* 按鈕：簡約邊框風格 */
+        .sub-nav {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .sub-btn {
+            flex: 1;
+            padding: 10px 5px;
+            font-size: 0.85rem;
+            border: 1px solid #e0e0e0;
+            background: #fbfbfb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #666;
+        }
+
+        .sub-btn.active {
+            background: #f8f1e7;
+            color: var(--honmaru-wood);
+            border-color: var(--gold-light);
+            font-weight: 600;
+        }
+
+        /* 表格：清爽配色 */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+        }
+
+        th {
+            background: #f7f7f7;
+            color: var(--honmaru-wood);
+            padding: 12px 8px;
+            font-weight: 600;
+            border-bottom: 2px solid #eee;
+        }
+
+        td {
+            padding: 10px 2px;
+            /* 縮減左右內距，爭取空間 */
+            text-align: center;
+            border-bottom: 1px solid #f9f9f9;
+            background: white;
+            vertical-align: middle;
+            font-size: 0.8rem;
+            /* 稍微縮小字體確保手機不換行 */
+            white-space: nowrap;
+            /* 強制文字不換行 */
+        }
+
+        /* 針對必要刀種欄位，因為內容較長，允許換行但保持置中 */
+        table td:last-child {
+            white-space: normal;
+            font-size: 0.75rem;
+            line-height: 1.2;
+            padding: 5px 2px;
+        }
+
+        /* 強制調整各欄位比例 */
+        table th:nth-child(1),
+        table td:nth-child(1) {
+            width: 15% !important;
+        }
+
+        /* 地圖 */
+        table th:nth-child(2),
+        table td:nth-child(2) {
+            width: 15% !important;
+        }
+
+        /* 時間 */
+        table th:nth-child(3),
+        table td:nth-child(3) {
+            width: 12% !important;
+        }
+
+        /* 總數 */
+        table th:nth-child(4),
+        table td:nth-child(4) {
+            width: 15% !important;
+        }
+
+        /* 每小時 */
+        table th:nth-child(5),
+        table td:nth-child(5) {
+            width: 10% !important;
+        }
+
+        /* LV */
+        table th:nth-child(6),
+        table td:nth-child(6) {
+            width: 33% !important;
+        }
+
+        /* 必要刀種 */
+
+        /* 篩選盒 */
+        .filter-box {
+            background: #fcfcfc;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+
+        .sword-tag {
+            padding: 2px 8px;
+            background: #eee;
+            color: #555;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            border: 1px solid #ddd;
+        }
+
+        .roll-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            color: var(--accent-red);
+            border: 6px double var(--gold-light);
+            font-size: 1.4rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .roll-btn:active {
+            transform: scale(0.95);
+            background: #fff5f5;
+        }
+
+        select,
+        input[type="text"] {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: inherit;
+            background: white;
+        }
+
+        /* 資料維護清單樣式 */
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .data-info b {
+            color: var(--honmaru-wood);
+            font-size: 1rem;
+        }
+
+        .data-info small {
+            color: #888;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 5px;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            color: var(--gold);
+            /* 統一使用古銅金色 */
+        }
+
+        .icon-btn:hover {
+            opacity: 0.6;
+        }
+
+        .icon-btn.del {
+            color: #d32f2f;
+        }
+
+        /* 刪除稍微偏紅 */
+    </style>
+</head>
+
+<body>
+
+    <div class="app-header">
+        <h2>🌸 審神者執務小助手 🌸</h2>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="showPage('page-exp', this)">遠征</button>
+        <button class="tab-btn" onclick="showPage('page-wiki', this)">入手</button>
+        <button class="tab-btn" onclick="showPage('page-battle', this)">出陣</button>
+        <button class="tab-btn" onclick="showPage('page-data', this)">維護</button>
+    </div>
+
+    <div id="page-exp" class="page active">
+        <div id="resTypeGroup" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;">
+            <button class="sub-btn active" onclick="setExpRes('wood', this)">木炭</button>
+            <button class="sub-btn" onclick="setExpRes('steel', this)">玉鋼</button>
+            <button class="sub-btn" onclick="setExpRes('cool', this)">冷卻</button>
+            <button class="sub-btn" onclick="setExpRes('stone', this)">砥石</button>
+            <button class="sub-btn" onclick="setExpRes('koban', this)">小判</button>
+            <button class="sub-btn" onclick="setExpRes('scroll', this)">依頼</button>
+            <button class="sub-btn" onclick="setExpRes('help', this)">手伝</button>
+        </div>
+
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <button class="sub-btn active" id="sortCP" onclick="setExpSort('cp')">每小時取得</button>
+            <button class="sub-btn" id="sortTotal" onclick="setExpSort('total')">單次總數</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:25%">地圖</th>
+                    <th style="width:15%">時間</th>
+                    <th style="width:12%">總數</th>
+                    <th style="width:15%">每小時</th>
+                    <th style="width:10%">LV</th>
+                    <th style="width:23%">必要刀種</th>
+                </tr>
+            </thead>
+            <tbody id="expTableBody"></tbody>
+        </table>
+    </div>
+
+    <div id="page-wiki" class="page">
+        <div class="sub-nav">
+            <button class="sub-btn active" onclick="switchWikiMode('path', this)">按途徑查</button>
+            <button class="sub-btn" onclick="switchWikiMode('sword', this)">按刀名查</button>
+        </div>
+
+        <div id="wiki-path-section">
+            <div style="display:flex; gap:5px; margin-bottom:15px;">
+                <button class="sub-btn active" id="btnForge" onclick="setPathType('forge')">鍛刀入手</button>
+                <button class="sub-btn" id="btnDrop" onclick="setPathType('drop')">關卡掉落</button>
+            </div>
+
+            <div id="forge-filter" class="filter-box">
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <select id="fTime" onchange="filterForge()">
+                        <option value="">所有時間</option>
+                    </select>
+                    <select id="fType" onchange="filterForge()">
+                        <option value="">所有刀種</option>
+                    </select>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:30%">時間</th>
+                            <th style="width:25%">刀種</th>
+                            <th>刀名</th>
+                        </tr>
+                    </thead>
+                    <tbody id="forgeBody"></tbody>
+                </table>
+            </div>
+
+            <div id="drop-filter" class="filter-box" style="display:none;">
+                <select id="dMap" onchange="renderDropTable()" style="width:100%; padding:8px;">
+                    <option value="">選擇關卡</option>
+                </select>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:20%">位置</th>
+                            <th>掉落清單 (按刀種分類)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dropBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="wiki-sword-section" style="display:none;">
+            <div id="swordTypeGroup" style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px;">
+            </div>
+            <select id="swordSelect" onchange="showSwordDetail()" style="width:100%; padding:8px; display:none;">
+                <option value="">-- 請先選擇刀種 --</option>
+            </select>
+            <div id="swordResult" style="margin-top:15px;"></div>
+        </div>
+    </div>
+
+    <div id="page-battle" class="page">
+        <div style="text-align:center; padding-top:20px;">
+            <div id="battleTags"
+                style="display:flex; justify-content:center; gap:5px; margin-bottom:20px; flex-wrap:wrap;">
+                <button class="sub-btn active" style="flex:none; width:80px;"
+                    onclick="selectBattleTag('日常', this)">日常</button>
+                <button class="sub-btn" style="flex:none; width:80px;"
+                    onclick="selectBattleTag('EXP', this)">EXP</button>
+                <button class="sub-btn" style="flex:none; width:80px;" onclick="selectBattleTag('掉落', this)">掉落</button>
+                <button class="sub-btn" style="flex:none; width:80px;"
+                    onclick="selectBattleTag('碎刀裝', this)">碎刀裝</button>
+            </div>
+            <button class="roll-btn" onclick="rollBattle()">出 陣</button>
+            <div id="battleResult" style="margin-top:40px; font-size:2rem; color:var(--accent-red); font-weight:bold;">
+            </div>
+        </div>
+    </div>
+
+    <div id="page-data" class="page">
+        <div class="filter-box">
+            <b>⚙️ 出陣標籤管理</b><br><br>
+            <input type="text" id="newMapName" placeholder="地圖名 (如 7-4)">
+            <div style="margin:10px 0;">
+                <label><input type="checkbox" name="mTag" value="日常">日常</label>
+                <label><input type="checkbox" name="mTag" value="EXP">EXP</label>
+                <label><input type="checkbox" name="mTag" value="掉落">掉落</label>
+                <label><input type="checkbox" name="mTag" value="碎刀裝">碎刀裝</label>
+            </div>
+            <button class="sub-btn active" style="width:100%" onclick="saveCustomMap()">儲存出陣地圖</button>
+        </div>
+        <div id="customMapList"></div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 📂 資料庫區域 (Hard-coded)
+        // ==========================================
+
+        const SWORD_DATA = [
+            { name: "童子切安綱‧剥落", type: "太刀", time: "不可鍛造" },
+            { name: "三日月宗近", type: "太刀", time: "04:00:00" },
+            { name: "小狐丸", type: "太刀", time: "04:00:00" },
+            { name: "石切丸", type: "大太刀", time: "02:30:00" },
+            { name: "岩融", type: "薙刀", time: "05:00:00" },
+            { name: "今剣", type: "短刀", time: "00:20:00" },
+            { name: "大典太光世", type: "太刀", time: "不可鍛造" },
+            { name: "ソハヤノツルキ", type: "太刀", time: "不可鍛造" },
+            { name: "数珠丸恒次", type: "太刀", time: "04:00:00" },
+            { name: "にっかり青江", type: "脇差", time: "00:40:00" },
+            { name: "鬼丸国綱", type: "太刀", time: "不可鍛造" },
+            { name: "鳴狐", type: "打刀", time: "01:30:00" },
+            { name: "一期一振", type: "太刀", time: "03:20:00" },
+            { name: "鯰尾藤四郎", type: "脇差", time: "00:40:00" },
+            { name: "骨喰藤四郎", type: "脇差", time: "00:40:00" },
+            { name: "平野藤四郎", type: "短刀", time: "00:30:00" },
+            { name: "厚藤四郎", type: "短刀", time: "00:30:00" },
+            { name: "後藤藤四郎", type: "短刀", time: "00:20:00" },
+            { name: "信濃藤四郎", type: "短刀", time: "00:20:00" },
+            { name: "前田藤四郎", type: "短刀", time: "00:20:00" },
+            { name: "秋田藤四郎", type: "短刀", time: "00:20:00" },
+            { name: "博多藤四郎", type: "短刀", time: "00:20:00" },
+            { name: "乱藤四郎", type: "短刀", time: "00:20:00" },
+            { name: "五虎退", type: "短刀", time: "00:20:00" },
+            { name: "薬研藤四郎", type: "短刀", time: "00:20:00" },
+            { name: "包丁藤四郎", type: "短刀", time: "00:20:00" },
+            { name: "大包平", type: "太刀", time: "不可鍛造" },
+            { name: "鶯丸", type: "太刀", time: "03:20:00" },
+            { name: "明石国行", type: "太刀", time: "不可鍛造" },
+            { name: "蛍丸", type: "大太刀", time: "03:00:00" },
+            { name: "愛染国俊", type: "短刀", time: "00:20:00" },
+            { name: "千子村正", type: "打刀", time: "03:00:00" },
+            { name: "蜻蛉切", type: "槍", time: "03:00:00" },
+            { name: "物吉貞宗", type: "脇差", time: "00:40:00" },
+            { name: "太鼓鐘貞宗", type: "短刀", time: "00:20:00" },
+            { name: "亀甲貞宗", type: "打刀", time: "01:30:00" },
+            { name: "燭台切光忠", type: "太刀", time: "不可鍛造" },
+            { name: "大般若長光", type: "太刀", time: "不可鍛造" },
+            { name: "小竜景光", type: "太刀", time: "03:20:00" },
+            { name: "江雪左文字", type: "太刀", time: "03:20:00" },
+            { name: "宗三左文字", type: "打刀", time: "01:30:00" },
+            { name: "小夜左文字", type: "短刀", time: "00:20:00" },
+            { name: "加州清光", type: "打刀", time: "01:30:00" },
+            { name: "大和守安定", type: "打刀", time: "01:30:00" },
+            { name: "歌仙兼定", type: "打刀", time: "01:30:00" },
+            { name: "和泉守兼定", type: "打刀", time: "03:00:00" },
+            { name: "陸奥守吉行", type: "打刀", time: "01:30:00" },
+            { name: "山姥切国広", type: "打刀", time: "01:30:00" },
+            { name: "山伏国広", type: "太刀", time: "不可鍛造" },
+            { name: "堀川国広", type: "脇差", time: "00:40:00" },
+            { name: "蜂須賀虎徹", type: "打刀", time: "01:30:00" },
+            { name: "浦島虎徹", type: "脇差", time: "00:40:00" },
+            { name: "長曽祢虎徹", type: "打刀", time: "03:00:00" },
+            { name: "髭切", type: "太刀", time: "03:20:00" },
+            { name: "膝丸", type: "太刀", time: "03:20:00" },
+            { name: "大倶利伽羅", type: "打刀", time: "03:00:00" },
+            { name: "へし切長谷部", type: "打刀", time: "02:30:00" },
+            { name: "不動行光", type: "短刀", time: "00:20:00" },
+            { name: "獅子王", type: "太刀", time: "不可鍛造" },
+            { name: "小烏丸", type: "太刀", time: "03:20:00" },
+            { name: "抜丸", type: "太刀", time: "不可鍛造" },
+            { name: "同田貫正国", type: "打刀", time: "03:00:00" },
+            { name: "鶴丸国永", type: "太刀", time: "03:20:00" },
+            { name: "太郎太刀", type: "大太刀", time: "02:30:00" },
+            { name: "次郎太刀", type: "大太刀", time: "02:30:00" },
+            { name: "日本号", type: "槍", time: "03:00:00" },
+            { name: "御手杵", type: "槍", time: "03:00:00" },
+            { name: "巴形薙刀", type: "薙刀", time: "05:00:00" },
+            { name: "毛利藤四郎", type: "短刀", time: "00:20:00" },
+            { name: "篭手切江", type: "脇差", time: "不可鍛造" },
+            { name: "謙信景光", type: "短刀", time: "00:30:00" },
+            { name: "小豆長光", type: "太刀", time: "03:20:00" },
+            { name: "日向正宗", type: "短刀", time: "不可鍛造" },
+            { name: "静形薙刀", type: "薙刀", time: "05:00:00" },
+            { name: "南泉一文字", type: "打刀", time: "不可鍛造" },
+            { name: "千代金丸", type: "太刀", time: "不可鍛造" },
+            { name: "山姥切長義", type: "打刀", time: "不可鍛造" },
+            { name: "豊前江", type: "打刀", time: "不可鍛造" },
+            { name: "祢々切丸", type: "大太刀", time: "不可鍛造" },
+            { name: "白山吉光", type: "劍", time: "不可鍛造" },
+            { name: "南海太郎朝尊", type: "打刀", time: "不可鍛造" },
+            { name: "肥前忠広", type: "脇差", time: "不可鍛造" },
+            { name: "北谷菜切", type: "短刀", time: "不可鍛造" },
+            { name: "桑名江", type: "打刀", time: "不可鍛造" },
+            { name: "水心子正秀", type: "打刀", time: "不可鍛造" },
+            { name: "源清麿", type: "打刀", time: "不可鍛造" },
+            { name: "松井江", type: "打刀", time: "不可鍛造" },
+            { name: "山鳥毛", type: "太刀", time: "不可鍛造" },
+            { name: "古今伝授の太刀", type: "太刀", time: "不可鍛造" },
+            { name: "地蔵行平", type: "打刀", time: "不可鍛造" },
+            { name: "治金丸", type: "脇差", time: "不可鍛造" },
+            { name: "日光一文字", type: "太刀", time: "不可鍛造" },
+            { name: "太閤左文字", type: "短刀", time: "不可鍛造" },
+            { name: "五月雨江", type: "打刀", time: "不可鍛造" },
+            { name: "大千鳥十文字槍", type: "槍", time: "不可鍛造" },
+            { name: "泛塵", type: "脇差", time: "不可鍛造" },
+            { name: "一文字則宗", type: "太刀", time: "不可鍛造" },
+            { name: "村雲江", type: "打刀", time: "不可鍛造" },
+            { name: "姫鶴一文字", type: "太刀", time: "不可鍛造" },
+            { name: "福島光忠", type: "太刀", time: "不可鍛造" },
+            { name: "七星剣", type: "劍", time: "不可鍛造" },
+            { name: "丙子椒林剣", type: "劍", time: "不可鍛造" },
+            { name: "稲葉江", type: "打刀", time: "不可鍛造" },
+            { name: "笹貫", type: "太刀", time: "不可鍛造" },
+            { name: "人間無骨", type: "槍", time: "不可鍛造" },
+            { name: "八丁念仏", type: "太刀", time: "不可鍛造" },
+            { name: "石田正宗", type: "打刀", time: "不可鍛造" },
+            { name: "実休光忠", type: "太刀", time: "不可鍛造" },
+            { name: "京極正宗", type: "短刀", time: "不可鍛造" },
+            { name: "孫六兼元", type: "打刀", time: "不可鍛造" },
+            { name: "後家兼光", type: "打刀", time: "不可鍛造" },
+            { name: "火車切", type: "脇差", time: "不可鍛造" },
+            { name: "富田江", type: "打刀", time: "不可鍛造" },
+            { name: "大慶直胤", type: "打刀", time: "不可鍛造" },
+            { name: "九鬼正宗", type: "短刀", time: "不可鍛造" },
+            { name: "雲生", type: "太刀", time: "不可鍛造" },
+            { name: "道誉一文字", type: "太刀", time: "不可鍛造" },
+            { name: "雲次", type: "太刀", time: "不可鍛造" },
+            { name: "面影", type: "太刀", time: "不可鍛造" },
+            { name: "古備前信房", type: "太刀", time: "不可鍛造" },
+            { name: "倶利伽羅江", type: "短刀", time: "不可鍛造" },
+            { name: "三郎国宗", type: "太刀", time: "不可鍛造" },
+            { name: "安宅切", type: "打刀", time: "不可鍛造" },
+            { name: "二筋樋貞宗", type: "打刀", time: "不可鍛造" },
+            { name: "雲重", type: "打刀", time: "不可鍛造" }
+        ];
+
+        // 定義官方刀種排序順序
+        const SWORD_ORDER = ["短刀", "脇差", "打刀", "太刀", "大太刀", "槍", "薙刀", "劍"];
+
+        const DROP_DATA = {
+            "1-1": {
+                normal: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"],
+                boss: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"]
+            },
+            "1-2": {
+                normal: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"],
+                boss: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"]
+            },
+            "1-3": {
+                normal: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"],
+                boss: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"]
+            },
+            "1-4": {
+                normal: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "堀川国広"],
+                boss: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "加州清光", "歌仙兼定", "陸奥守吉行", "山姥切国広", "蜂須賀虎徹"]
+            },
+            "2-1": {
+                normal: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"],
+                boss: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"]
+            },
+            "2-2": {
+                normal: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "篭手切江"],
+                boss: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"]
+            },
+            "2-3": {
+                normal: ["厚藤四郎", "後藤藤四郎", "信濃藤四郎", "前田藤四郎", "秋田藤四郎", "博多藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "包丁藤四郎", "愛染国俊", "小夜左文字", "篭手切江"],
+                boss: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"]
+            },
+            "2-4": {
+                normal: ["平野藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"],
+                boss: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"]
+            },
+            "3-1": {
+                normal: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"],
+                boss: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "堀川国広", "不動行光"]
+            },
+            "3-2": {
+                normal: ["平野藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "不動行光"],
+                boss: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川国広", "蜂須賀虎徹", "不動行光"]
+            },
+            "3-3": {
+                normal: ["前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字"],
+                boss: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "加州清光", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川国広", "蜂須賀虎徹", "不動行光"]
+            },
+            "3-4": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "堀川国広"],
+                boss: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "加州清光", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川国広", "蜂須賀虎徹", "へし切長谷部", "不動行光"]
+            },
+            "4-1": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "堀川国広"],
+                boss: ["にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川国広", "蜂須賀虎徹", "へし切長谷部", "不動行光"]
+            },
+            "4-2": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "堀川国広"],
+                boss: ["にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川国広", "蜂須賀虎徹", "へし切長谷部", "不動行光"]
+            },
+            "4-3": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "堀川国広"],
+                boss: ["にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川国広", "蜂須賀虎徹", "へし切長谷部", "不動行光"]
+            },
+            "4-4": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "厚藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "小夜左文字", "堀川国広"],
+                boss: ["三日月宗近", "にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川国広", "蜂須賀虎徹", "へし切長谷部"]
+            },
+            "5-1": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川国広", "蜂須賀虎徹", "髭切", "膝丸"],
+                boss: ["にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "小烏丸", "同田貫正国"]
+            },
+            "5-2": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川國廣", "蜂須賀虎徹"],
+                boss: ["にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "同田貫正国"]
+            },
+            "5-3": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川國廣", "蜂須賀虎徹"],
+                boss: ["にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "亀甲貞宗", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "同田貫正国"]
+            },
+            "5-4": {
+                normal: ["小狐丸", "にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "堀川國廣", "蜂須賀虎徹", "巴形薙刀"],
+                boss: ["三日月宗近", "岩融", "今劍", "にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "同田貫正国"]
+            },
+            "6-1": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "獅子王"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵"]
+            },
+            "6-2": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "獅子王"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "明石国行", "蛍丸", "愛染国俊", "蜻蛉切", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵"]
+            },
+            "6-3": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "獅子王"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "長曽祢虎徹", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵"]
+            },
+            "6-4": {
+                normal: ["にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "獅子王"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "亂藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "長曽祢虎徹", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "日本号", "御手杵"]
+            },
+            "7-1": {
+                normal: ["石切丸", "にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "後藤藤四郎", "信濃藤四郎", "前田藤四郎", "秋田藤四郎", "博多藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "包丁藤四郎", "愛染国俊", "蜻蛉切", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "浦島虎徹", "大倶利伽羅", "獅子王", "太郎太刀", "次郎太刀", "御手杵"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "物吉貞宗", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵"]
+            },
+            "7-2": {
+                normal: ["石切丸", "にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "蜻蛉切", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "浦島虎徹", "大倶利伽羅", "獅子王", "太郎太刀", "次郎太刀", "御手杵", "篭手切江"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "太鼓鐘貞宗", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵"]
+            },
+            "7-3": {
+                normal: ["石切丸", "大典太光世", "にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "大包平", "愛染国俊", "蜻蛉切", "物吉貞宗", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "獅子王", "小烏丸", "太郎太刀", "次郎太刀", "御手杵", "篭手切江"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "亀甲貞宗", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵"]
+            },
+            "7-4": {
+                normal: ["石切丸", "ソハヤノツルキ", "にっかり青江", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "千子村正", "蜻蛉切", "亀甲貞宗", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "獅子王", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵"],
+                boss: ["石切丸", "数珠丸恒次", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "亂藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵"]
+            },
+            "8-1": {
+                normal: ["石切丸", "にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "厚藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "蜻蛉切", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "獅子王", "同田貫正国", "太郎太刀", "次郎太刀", "御手杵"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "亂藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "燭台切光忠", "小竜景光", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵"]
+            },
+            "8-2": {
+                normal: ["石切丸", "にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "厚藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "千子村正", "蜻蛉切", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "獅子王", "同田貫正国", "太郎太刀", "次郎太刀", "御手杵"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "亂藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵", "日向正宗"]
+            },
+            "8-3": {
+                normal: ["石切丸", "にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "厚藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "蜻蛉切", "物吉貞宗", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "獅子王", "同田貫正国", "太郎太刀", "次郎太刀", "御手杵"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "亂藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵", "南泉一文字"]
+            },
+            "8-4": {
+                normal: ["石切丸", "にっかり青江", "鳴狐", "鯰尾藤四郎", "骨喰藤四郎", "厚藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "愛染国俊", "蜻蛉切", "燭台切光忠", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "獅子王", "同田貫正国", "太郎太刀", "次郎太刀", "御手杵"],
+                boss: ["石切丸", "にっかり青江", "鳴狐", "一期一振", "鯰尾藤四郎", "骨喰藤四郎", "前田藤四郎", "秋田藤四郎", "亂藤四郎", "五虎退", "薬研藤四郎", "鶯丸", "蛍丸", "愛染国俊", "蜻蛉切", "燭台切光忠", "江雪左文字", "宗三左文字", "小夜左文字", "加州清光", "大和守安定", "歌仙兼定", "陸奥守吉行", "山姥切国広", "山伏国広", "堀川國廣", "蜂須賀虎徹", "大倶利伽羅", "へし切長谷部", "獅子王", "同田貫正国", "鶴丸国永", "太郎太刀", "次郎太刀", "御手杵", "泛塵"]
+            },
+            "検非違使": {
+                normal: ["今剣", "厚藤四郎", "前田藤四郎", "秋田藤四郎", "乱藤四郎", "五虎退", "薬研藤四郎", "小夜左文字", "にっかり青江", "鯰尾藤四郎", "骨喰藤四郎", "堀川国広", "鳴狐", "宗三左文字", "加州清光", "大和守安定", "歌仙兼定", "和泉守兼定", "陸奥守吉行", "山姥切国広", "蜂須賀虎徹", "へし切長谷部", "燭台切光忠", "髭切", "膝丸", "山伏国広"],
+                boss: [" "]
+            }
+        };
+
+        const EXP_DATA = [
+            { name: "1-1", time: 10, lv: 5, req: " ", res: { wood: 10, steel: 15, cool: 0, stone: 0, koban: 0, scroll: 0, help: 0 } },
+            { name: "1-2", time: 30, lv: 10, req: "短1", res: { wood: 0, steel: 0, cool: 30, stone: 30, koban: 0, scroll: 0, help: 0 } },
+            { name: "1-3", time: 20, lv: 20, req: "脇1", res: { wood: 20, steel: 0, cool: 20, stone: 0, koban: 0, scroll: 0, help: 0 } },
+            { name: "1-4", time: 60, lv: 30, req: "短1 脇1", res: { wood: 0, steel: 60, cool: 0, stone: 60, koban: 0, scroll: 0, help: 0 } },
+            { name: "2-1", time: 90, lv: 50, req: " ", res: { wood: 0, steel: 0, cool: 90, stone: 90, koban: 200, scroll: 0, help: 0 } },
+            { name: "2-2", time: 180, lv: 60, req: "打1", res: { wood: 0, steel: 50, cool: 0, stone: 250, koban: 200, scroll: 0, help: 0 } },
+            { name: "2-3", time: 120, lv: 80, req: "太1", res: { wood: 120, steel: 0, cool: 120, stone: 0, koban: 0, scroll: 1, help: 0 } },
+            { name: "2-4", time: 150, lv: 100, req: "打1 太1", res: { wood: 0, steel: 180, cool: 0, stone: 120, koban: 0, scroll: 0, help: 1 } },
+            { name: "3-1", time: 240, lv: 100, req: " ", res: { wood: 130, steel: 240, cool: 0, stone: 0, koban: 0, scroll: 1, help: 0 } },
+            { name: "3-2", time: 180, lv: 120, req: "大太1", res: { wood: 0, steel: 100, cool: 60, stone: 150, koban: 0, scroll: 0, help: 1 } },
+            { name: "3-3", time: 600, lv: 130, req: " ", res: { wood: 200, steel: 0, cool: 500, stone: 0, koban: 400, scroll: 0, help: 0 } },
+            { name: "3-4", time: 480, lv: 140, req: " ", res: { wood: 0, steel: 200, cool: 0, stone: 500, koban: 0, scroll: 0, help: 1 } },
+            { name: "4-1", time: 120, lv: 150, req: " ", res: { wood: 0, steel: 80, cool: 100, stone: 60, koban: 0, scroll: 1, help: 0 } },
+            { name: "4-2", time: 300, lv: 180, req: " ", res: { wood: 100, steel: 380, cool: 0, stone: 0, koban: 400, scroll: 0, help: 0 } },
+            { name: "4-3", time: 720, lv: 200, req: " ", res: { wood: 100, steel: 200, cool: 500, stone: 0, koban: 0, scroll: 0, help: 2 } },
+            { name: "4-4", time: 360, lv: 220, req: " ", res: { wood: 150, steel: 0, cool: 0, stone: 400, koban: 700, scroll: 0, help: 0 } },
+            { name: "5-1", time: 90, lv: 50, req: " ", res: { wood: 250, steel: 250, cool: 250, stone: 0, koban: 0, scroll: 0, help: 2 } },
+            { name: "5-2", time: 180, lv: 60, req: "槍1", res: { wood: 200, steel: 500, cool: 300, stone: 0, koban: 700, scroll: 0, help: 2 } },
+            { name: "5-3", time: 120, lv: 80, req: "薙1", res: { wood: 350, steel: 200, cool: 100, stone: 250, koban: 700, scroll: 0, help: 0 } },
+            { name: "5-4", time: 150, lv: 100, req: " ", res: { wood: 300, steel: 400, cool: 500, stone: 0, koban: 700, scroll: 3, help: 0 } },
+            // ...之後可以按此格式補齊所有遠征
+        ];
+
+        // ==========================================
+        // ⚙️ 核心邏輯區域
+        // ==========================================
+
+        let customBattleMaps = JSON.parse(localStorage.getItem('touken_bat_v11')) || [];
+        let currentBattleTag = "日常";
+
+        function showPage(p, btn) {
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(p).classList.add('active');
+            btn.classList.add('active');
+            if (p === 'page-wiki') initWikiOptions();
+            if (p === 'page-exp') calculateExpedition();
+            if (p === 'page-data') renderCustomMapList();
+        }
+
+        /* --- 遠征排行 --- */
+        let currentExpRes = 'wood'; // 預設木炭
+        let currentExpSort = 'cp';  // 預設每小時取得
+
+        function setExpRes(res, btn) {
+            currentExpRes = res;
+            document.querySelectorAll('#resTypeGroup .sub-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            calculateExpedition();
+        }
+
+        function setExpSort(sortType) {
+            currentExpSort = sortType;
+            document.getElementById('sortCP').classList.toggle('active', sortType === 'cp');
+            document.getElementById('sortTotal').classList.toggle('active', sortType === 'total');
+            calculateExpedition();
+        }
+
+        function calculateExpedition() {
+            const tbody = document.getElementById('expTableBody');
+            if (!tbody) return;
+
+            // 時間格式化工具：將分鐘轉為 hh:mm
+            const formatTime = (mins) => {
+                const h = Math.floor(mins / 60).toString().padStart(2, '0');
+                const m = (mins % 60).toString().padStart(2, '0');
+                return `${h}:${m}`;
+            };
+
+            // 篩選與排序
+            let filtered = EXP_DATA.filter(e => e.res[currentExpRes] > 0);
+            filtered.sort((a, b) => {
+                if (currentExpSort === 'cp') {
+                    return (b.res[currentExpRes] / b.time) - (a.res[currentExpRes] / a.time);
+                } else {
+                    return b.res[currentExpRes] - a.res[currentExpRes];
+                }
+            });
+
+            // 渲染表格內容
+            tbody.innerHTML = filtered.map(e => {
+                const hourly = (e.res[currentExpRes] / e.time * 60).toFixed(1);
+                return `
+                <tr>
+                    <td><b>${e.name}</b></td>
+                    <td>${formatTime(e.time)}</td>
+                    <td>${e.res[currentExpRes]}</td>
+                    <td style="color:var(--accent-red); font-weight:bold;">${hourly}</td>
+                    <td>${e.lv}</td>
+                    <td>${e.req}</td>
+                </tr>
+            `;
+            }).join('');
+        }
+
+        /* --- 遠征排行結束，以下為新插入的入手查詢邏輯 --- */
+
+        function switchWikiMode(mode, btn) {
+            document.querySelectorAll('.sub-nav .sub-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('wiki-path-section').style.display = (mode === 'path' ? 'block' : 'none');
+            document.getElementById('wiki-sword-section').style.display = (mode === 'sword' ? 'block' : 'none');
+            if (mode === 'sword') renderSwordTypeButtons();
+            if (mode === 'path') initWikiOptions();
+        }
+
+        // 途徑切換 (鍛刀/掉落)
+        function setPathType(type) {
+            document.getElementById('btnForge').classList.toggle('active', type === 'forge');
+            document.getElementById('btnDrop').classList.toggle('active', type === 'drop');
+            document.getElementById('forge-filter').style.display = (type === 'forge' ? 'block' : 'none');
+            document.getElementById('drop-filter').style.display = (type === 'drop' ? 'block' : 'none');
+            if (type === 'drop') initWikiOptions(); // 確保地圖選單有資料
+        }
+
+        // 產生刀種按鈕 (按刀名查模式)
+        function renderSwordTypeButtons() {
+            const group = document.getElementById('swordTypeGroup');
+            // 取得現有的刀種，並依照 SWORD_ORDER 排序
+            const types = [...new Set(SWORD_DATA.map(s => s.type))].sort((a, b) => {
+                return SWORD_ORDER.indexOf(a) - SWORD_ORDER.indexOf(b);
+            });
+
+            group.innerHTML = types.map(t => `
+            <button class="sub-btn" style="flex:none; width:auto; padding:5px 12px; margin-bottom:5px;" onclick="selectSwordType('${t}', this)">${t}</button>
+        `).join('');
+            document.getElementById('swordSelect').style.display = 'none';
+            document.getElementById('swordResult').innerHTML = "";
+        }
+
+        // 選擇刀種後更新下拉選單
+        function selectSwordType(type, btn) {
+            document.querySelectorAll('#swordTypeGroup .sub-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const sel = document.getElementById('swordSelect');
+            const swords = SWORD_DATA.filter(s => s.type === type);
+
+            sel.innerHTML = '<option value="">-- 選擇刀劍 --</option>' +
+                swords.map(s => `<option value="${s.name}">${s.name}</option>`).join('');
+            sel.style.display = 'block';
+            document.getElementById('swordResult').innerHTML = "";
+        }
+
+        // 顯示最終查詢結果 (優化版)
+        function showSwordDetail() {
+            const name = document.getElementById('swordSelect').value;
+            const res = document.getElementById('swordResult');
+            if (!name) return res.innerHTML = "";
+
+            const s = SWORD_DATA.find(x => x.name === name);
+            let d_boss = [];
+            let d_normal = [];
+
+            // 分類收集掉落地點
+            for (let m in DROP_DATA) {
+                if (DROP_DATA[m].boss.includes(s.name)) d_boss.push(m);
+                if (DROP_DATA[m].normal.includes(s.name)) d_normal.push(m);
+            }
+
+            // 生成標籤的輔助函數
+            const makeTags = (list, colorClass) => {
+                return list.map(m => `
+                    <span class="sword-tag" style="margin: 2px; background: ${colorClass === 'boss' ? '#fff5f5' : '#f9f9f9'}; 
+                          border: 1px solid ${colorClass === 'boss' ? '#ffcccc' : '#ddd'}; 
+                          color: ${colorClass === 'boss' ? 'var(--accent-red)' : '#666'};">
+                        ${m}
+                    </span>
+                `).join('');
+            };
+
+            res.innerHTML = `
+                <div style="background:white; padding:15px; border-radius:12px; border:1px solid var(--gold-light); box-shadow: var(--shadow);">
+                    <h3 style="margin:0 0 10px 0; color:var(--honmaru-wood); border-bottom:2px solid #f4f1ea; padding-bottom:8px; display:flex; align-items:center; gap:10px;">
+                        ${s.name} <span style="font-size:0.8rem; font-weight:normal; background:var(--bg-light); padding:2px 8px; border-radius:4px; color:#666;">${s.type}</span>
+                    </h3>
+                    
+                    <p style="margin: 8px 0;"><b>🌸 鍛刀時間：</b><span style="color:var(--gold);">${s.time}</span></p>
+                    
+                    <div style="margin-top:15px;">
+                        <b style="display:block; margin-bottom:8px;">📍 掉落關卡：</b>
+                        
+                        ${d_boss.length ? `
+                            <div style="margin-bottom:10px;">
+                                <small style="color:var(--accent-red); display:block; margin-bottom:4px;">[BOSS 點]</small>
+                                <div style="display:flex; flex-wrap:wrap;">${makeTags(d_boss, 'boss')}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${d_normal.length ? `
+                            <div>
+                                <small style="color:#888; display:block; margin-bottom:4px;">[道中/一般]</small>
+                                <div style="display:flex; flex-wrap:wrap;">${makeTags(d_normal, 'normal')}</div>
+                            </div>
+                        ` : ''}
+                        
+                        ${(!d_boss.length && !d_normal.length) ? '<span style="color:#999; font-size:0.85rem;">暫無掉落資料</span>' : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+
+
+        // 初始化選單資料（這段要接在 showSwordDetail 後面）
+        function initWikiOptions() {
+            const timeSel = document.getElementById('fTime');
+            const mapSel = document.getElementById('dMap');
+            const typeSel = document.getElementById('fType');
+
+            if (timeSel && timeSel.options.length <= 1) {
+                // 1. 時間篩選：維持數字排序
+                [...new Set(SWORD_DATA.map(s => s.time))].sort().forEach(t => timeSel.add(new Option(t, t)));
+
+                // 2. 刀種篩選：依照 SWORD_ORDER 排序
+                const types = [...new Set(SWORD_DATA.map(s => s.type))].sort((a, b) => {
+                    let idxA = SWORD_ORDER.indexOf(a);
+                    let idxB = SWORD_ORDER.indexOf(b);
+                    return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+                });
+                types.forEach(t => typeSel.add(new Option(t, t)));
+
+                // 3. 關卡選單
+                Object.keys(DROP_DATA).sort().forEach(m => mapSel.add(new Option(m, m)));
+            }
+            filterForge();
+        }
+
+        // 鍛刀篩選邏輯
+        function filterForge() {
+            const t = document.getElementById('fTime').value;
+            const ty = document.getElementById('fType').value;
+            const tbody = document.getElementById('forgeBody');
+            const filtered = SWORD_DATA.filter(s => (!t || s.time === t) && (!ty || s.type === ty));
+            tbody.innerHTML = filtered.map(s => `<tr><td>${s.time}</td><td>${s.type}</td><td><b>${s.name}</b></td></tr>`).join('');
+        }
+
+        // 關卡掉落渲染邏輯
+        function renderDropTable() {
+            const mapKey = document.getElementById('dMap').value;
+            const tbody = document.getElementById('dropBody');
+            if (!mapKey) return tbody.innerHTML = "";
+            const data = DROP_DATA[mapKey];
+
+            const categorize = (list) => {
+                const groups = {};
+                list.forEach(name => {
+                    const s = SWORD_DATA.find(x => x.name === name);
+                    const type = s ? s.type : "其他";
+                    if (!groups[type]) groups[type] = [];
+                    groups[type].push(name);
+                });
+
+                const sortedTypes = Object.keys(groups).sort((a, b) => {
+                    let idxA = SWORD_ORDER.indexOf(a);
+                    let idxB = SWORD_ORDER.indexOf(b);
+                    return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+                });
+
+                // 這裡改用 Grid 佈局：第一欄固定寬度放刀種，第二欄放刀名，全部靠左
+                return sortedTypes.map(type => `
+                    <div style="display: grid; grid-template-columns: 65px 1fr; gap: 8px; align-items: start; margin-bottom: 6px; text-align: left;">
+                        <span class="sword-tag" style="background: #f0f0f0; color: #666; justify-self: start;">${type}</span>
+                        <span style="color: #333; line-height: 1.5;">${groups[type].join('、')}</span>
+                    </div>
+                `).join('');
+            };
+
+            tbody.innerHTML = `
+                <tr>
+                    <td style="background:#f9f9f9; width: 60px; vertical-align: top; padding-top: 15px;">道中</td>
+                    <td style="padding: 12px; text-align: left;">${categorize(data.normal)}</td>
+                </tr>
+                <tr>
+                    <td style="background:#fff5f5; width: 60px; vertical-align: top; padding-top: 15px; color: var(--accent-red); font-weight: bold;">BOSS</td>
+                    <td style="padding: 12px; text-align: left; border-top: 1px solid #ffeaea;">${categorize(data.boss)}</td>
+                </tr>
+            `;
+        }
+
+        /* --- 隨機出陣 --- */
+        function selectBattleTag(tag, btn) {
+            currentBattleTag = tag;
+            document.querySelectorAll('#battleTags .sub-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+        function rollBattle() {
+            const pool = customBattleMaps.filter(m => m.tags.includes(currentBattleTag));
+            const res = document.getElementById('battleResult');
+            if (!pool.length) return res.innerText = "請先錄入地圖";
+            res.innerText = "🥁...";
+            setTimeout(() => {
+                res.innerText = "🌸 " + pool[Math.floor(Math.random() * pool.length)].name;
+            }, 300);
+        }
+
+        /* --- 資料維護 (出陣) --- */
+        let editingIndex = -1; // 追蹤目前正在編輯哪一筆，-1 代表新增模式
+
+        function saveCustomMap() {
+            const n = document.getElementById('newMapName').value.trim();
+            const t = Array.from(document.querySelectorAll('input[name="mTag"]:checked')).map(c => c.value);
+
+            if (!n || !t.length) return alert("請輸入地圖名稱並至少選擇一個標籤。");
+
+            const mapData = { name: n, tags: t };
+
+            if (editingIndex > -1) {
+                // 編輯模式：取代舊資料
+                customBattleMaps[editingIndex] = mapData;
+                editingIndex = -1; // 回到新增模式
+                document.querySelector('#page-data .sub-btn.active').innerText = "儲存出陣地圖";
+            } else {
+                // 新增模式
+                customBattleMaps.push(mapData);
+            }
+
+            localStorage.setItem('touken_bat_v11', JSON.stringify(customBattleMaps));
+
+            // 清空輸入欄位
+            document.getElementById('newMapName').value = "";
+            document.querySelectorAll('input[name="mTag"]').forEach(c => c.checked = false);
+
+            renderCustomMapList();
+        }
+
+        function editMap(i) {
+            const m = customBattleMaps[i];
+            document.getElementById('newMapName').value = m.name;
+
+            // 勾選對應標籤
+            document.querySelectorAll('input[name="mTag"]').forEach(c => {
+                c.checked = m.tags.includes(c.value);
+            });
+
+            editingIndex = i;
+            // 更改按鈕文字提示正在編輯模式
+            document.querySelector('#page-data .sub-btn.active').innerText = "更新地圖資料";
+            // 自動捲動到輸入框位置
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function delMap(i) {
+            if (!confirm("確定要刪除這筆地圖資料嗎？")) return;
+            customBattleMaps.splice(i, 1);
+            localStorage.setItem('touken_bat_v11', JSON.stringify(customBattleMaps));
+            renderCustomMapList();
+        }
+
+        function renderCustomMapList() {
+            const div = document.getElementById('customMapList');
+            // 精緻的 SVG 圖示線條
+            const editIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+            const trashIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`;
+
+            div.innerHTML = customBattleMaps.map((m, i) => `
+            <div class="data-item">
+                <div class="data-info">
+                    <b>${m.name}</b>
+                    <small>${m.tags.join(' / ')}</small>
+                </div>
+                <div class="action-btns">
+                    <button class="icon-btn" onclick="editMap(${i})" title="編輯">${editIcon}</button>
+                    <button class="icon-btn del" onclick="delMap(${i})" title="刪除">${trashIcon}</button>
+                </div>
+            </div>
+        `).join('');
+        }
+
+        // 初始化排行
+        calculateExpedition();
+    </script>
+</body>
+
+</html>
